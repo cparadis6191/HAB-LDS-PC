@@ -90,14 +90,16 @@ int main(){
 		cout<<"Error occured while writing.\n";
 		CloseHandle(hSerial);
 	}
-	while(readBuffer[0]!=0xBB){						//Wait until byte 0XBB is recieved from AVR to know it is ready to commuicate
+	cout<<"Yo byte sent.\n";
+	while(readBuffer[0]!=(char)0xBB){						//Wait until byte 0XBB is recieved from AVR to know it is ready to commuicate
 		if(!ReadFile(hSerial,readBuffer,1,&BytesRead,NULL)){
 			cout<<"Error occured while reading.\n";
 			CloseHandle(hSerial);
 			exit(EXIT_FAILURE);
-		}	
+		}
+		cout<<readBuffer[0];
 	}
-	
+	cout<<"Ready byte recieved";
 //Begin setting polling or recieving data
 	while(1){
 													//Give switch-case options
@@ -140,19 +142,30 @@ int main(){
 				cout<<"Error occured while writing.\n";
 				CloseHandle(hSerial);
 			}
-			while(readBuffer[0]!=0xDB){				//Read in data until 0XDB is sent indicating all data has been sent
+			while(1){				//Read in data until 0XDB is sent indicating all data has been sent
 				if(!ReadFile(hSerial,readBuffer,1,&BytesRead,NULL)){
 					cout<<"Error occured while reading.\n";
 					CloseHandle(hSerial);
 					exit(EXIT_FAILURE);
 				}
-				datafile<<readBuffer[0];			//Write data to file byte by byte
+				if(readBuffer[0]==(char)0xDB){
+					break;
+				}else{
+					datafile<<readBuffer[0];			//Write data to file byte by byte
+				}
 			}
 			datafile.close();						//Once all data has been read close file and prompt user.
 			cout<<"Data successfully writtien to \"data.txt\"";
 			break;
 		
 		case 'E':									//On quit close communication handle and return
+			
+			writeBuffer[0]=0xFB;					//Send 0XFB to AVR indicating that communication is being closed
+			if(!WriteFile(hSerial,writeBuffer,1,&BytesWrite,NULL)){
+				cout<<"Error occured while writing.\n";
+				CloseHandle(hSerial);
+			}
+			
 			CloseHandle(hSerial);
 			
 			return 0;
