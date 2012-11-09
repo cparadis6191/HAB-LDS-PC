@@ -105,6 +105,7 @@ int main(){
 													//Give switch-case options
 		cout<<"\nPress 'R' to begin recieving data from the device.\n";
 		cout<<"Press 'S' to begin sending a polling interval to the device.\n";
+		cout<<"Press 'C' to clear memory.\n";
 		cout<<"Press 'E' to close out of the program.\n";
 		cin>>swtch;
 		
@@ -169,6 +170,16 @@ int main(){
 			CloseHandle(hSerial);
 			
 			return 0;
+		
+		case 'C':									//On quit close communication handle and return
+			
+			writeBuffer[0]=0xAC;					//Send 0XAC to AVR indicating that communication is being closed
+			if(!WriteFile(hSerial,writeBuffer,1,&BytesWrite,NULL)){
+				cout<<"Error occured while writing.\n";
+				CloseHandle(hSerial);
+			}
+			
+			break;
 		
 		default:									//On invalid input prompt user.
 			cout<<"\nInvalid input\n";
